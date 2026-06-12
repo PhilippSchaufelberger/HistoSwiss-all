@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>HistoSwiss – Karte</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+    <style>#map{height:100vh;margin:0}</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+const map = L.map('map').setView([46.8182, 8.2275], 8);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+
+const markers = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 80 });
+const geojsonUrl = 'https://philippschaufelberger.github.io/HistoPics/histopics.geojson';
+
+fetch(geojsonUrl)
+  .then(response => response.json())
+  .then(data => {
+    L.geoJSON(data, {
+      pointToLayer: (f, latlng) => L.marker(latlng),
+      onEachFeature: (f, l) => {
+        const p = f.properties;
+        const lat = l.getLatLng().lat;
+        const lng = l.getLatLng().lng;
+        let popup = `<b>${p.name || 'POI'}</b>`;
+        
+        // Bild
+        if (p.image_url && p.image_url.trim() !== "") {
+          popup += `<br><img src="${p.image_url}" width="250">`;
+        }
+        
+        // Liste vorbereiten
+        const items = [];
+        
+        // Distanz
+        if (p.distanz_kfr && p.distanz_kfr !== "" && p.distanz_kfr !== "Keine Angabe") {
+          items.push(`📏 Distanz zur KFR: ${p.distanz_kfr}`);
+        }
+        
+        // Quelle (target_url)
+        if (p.target_url && p.target_url.trim() !== "") {
+          items.push(`<a href="${p.target_url}" target="_blank">🔗 HistoPics / HistoSwiss</a>`);
+        }
+        
+        // Formular (aus form_id)
+        if (p.form_id && p.form_id.trim() !== "") {
+          const formUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=oee1AwnLF0SeGsaGtECyxSYqCNTH3KVCvNcgoFLg2XZUMTZFRlJWRkVXQVZUOE9EVUs4MUc1NFZWUS4u&rf7c4e2f2d7d7438c8efbe1b915a05a0c=" + p.form_id;
+          items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
+        }
+        
+        // Google Maps Link (neu)
+        const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+        items.push(`<a href="${googleMapsUrl}" target="_blank">🗺️ In Google Maps öffnen</a>`);
+        
+        // Liste einfügen
+        if (items.length > 0) {
+          popup += "<br><ul><li>" + items.join("</li><li>") + "</li></ul>";
+        }
+        
+        l.bindPopup(popup);
+      }
+    }).eachLayer(layer => markers.addLayer(layer));
+    map.addLayer(markers);
+    map.fitBounds(markers.getBounds());
+  })
+  .catch(error => {
+    document.getElementById('map').innerHTML = `<div style="color:red;padding:20px;">Fehler: ${error.message}</div>`;
+  });
+</script>
+</body>
+</html>
