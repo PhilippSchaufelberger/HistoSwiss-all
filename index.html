@@ -17,7 +17,9 @@ const map = L.map('map').setView([46.8182, 8.2275], 8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
 
 const markers = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 80 });
-const geojsonUrl = 'https://github.com/PhilippSchaufelberger/HistoSwiss-all/blob/main/histoswiss_all.geojson';
+
+// KORREKTUR 1: Offizielle Raw-URL von GitHub verwenden (mit Unterstrich)
+const geojsonUrl = 'https://githubusercontent.com';
 
 fetch(geojsonUrl)
   .then(response => response.json())
@@ -48,8 +50,8 @@ fetch(geojsonUrl)
           items.push(`<a href="${p.target_url}" target="_blank">🔗 HistoPics / HistoSwiss</a>`);
         }
         
-      // Formular (aus form_id)
-if (p.form_id && p.form_id.trim() !== "") {
+        // Formular (aus form_id)
+        if (p.form_id && p.form_id.trim() !== "") {
           const formUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=oee1AwnLF0SeGsaGtECyxSYqCNTH3KVCvNcgoFLg2XZUMTZFRlJWRkVXQVZUOE9EVUs4MUc1NFZWUS4u&rf7c4e2f2d7d7438c8efbe1b915a05a0c=" + p.form_id;
       items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
 }
