@@ -48,11 +48,11 @@ fetch(geojsonUrl)
           items.push(`<a href="${p.target_url}" target="_blank">🔗 HistoPics / HistoSwiss</a>`);
         }
         
-        // Formular (aus form_id)
-        if (p.form_id && p.form_id.trim() !== "") {
+      // Formular (aus form_id)
+if (p.form_id && p.form_id.trim() !== "") {
           const formUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=oee1AwnLF0SeGsaGtECyxSYqCNTH3KVCvNcgoFLg2XZUMTZFRlJWRkVXQVZUOE9EVUs4MUc1NFZWUS4u&rf7c4e2f2d7d7438c8efbe1b915a05a0c=" + p.form_id;
-          items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
-        }
+      items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
+}
         
         // Google Maps Link (neu)
         const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
