@@ -20,7 +20,10 @@ const markers = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 8
 const geojsonUrl = 'https://philippschaufelberger.github.io/HistoSwiss-all/histoswiss-all2026.07.07.geojson';
 
 fetch(geojsonUrl)
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) throw new Error('GeoJSON-Datei konnte nicht geladen werden');
+    return response.json();
+  })
   .then(data => {
     L.geoJSON(data, {
       pointToLayer: (f, latlng) => L.marker(latlng),
@@ -54,7 +57,7 @@ fetch(geojsonUrl)
           items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
         }
         
-        // Google Maps Link (neu)
+           // Google Maps Link
         const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
         items.push(`<a href="${googleMapsUrl}" target="_blank">🗺️ In Google Maps öffnen</a>`);
         
@@ -66,8 +69,18 @@ fetch(geojsonUrl)
         l.bindPopup(popup);
       }
     }).eachLayer(layer => markers.addLayer(layer));
+    
     map.addLayer(markers);
-    map.fitBounds(markers.getBounds());
+    
+    // BEHEBUNG FÜR "BOUNDS NOT VALID":
+    // Wir prüfen erst, ob gültige Koordinaten-Grenzen existieren
+    const bounds = markers.getBounds();
+    if (bounds.isValid()) {
+        map.fitBounds(bounds);
+    } else {
+        // Falls der Cluster-Manager noch rechnet, nutzen wir die Standard-Schweiz-Ansicht als Fallback
+        map.setView([46.8182, 8.2275], 8);
+    }
   })
   .catch(error => {
     document.getElementById('map').innerHTML = `<div style="color:red;padding:20px;">Fehler: ${error.message}</div>`;
