@@ -2,89 +2,134 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>HistoSwiss – Karte</title>
+    <title>HistoPics – Karte</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
-    <style>#map{height:100vh;margin:0}</style>
+    <style>
+        #map {
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
 </head>
 <body>
 <div id="map"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-<script>
-const map = L.map('map').setView([46.8182, 8.2275], 8);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
 
-const markers = L.markerClusterGroup({ chunkedLoading: true, maxClusterRadius: 80 });
+<script>
+    // ============================================================
+    // 1. URL-Parameter auslesen (NEU)
+    // ============================================================
+    const urlParams = new URLSearchParams(window.location.search);
+    const startLat = parseFloat(urlParams.get('lat'));
+    const startLng = parseFloat(urlParams.get('lng'));
+    const startZoom = parseInt(urlParams.get('z')) || 8;
+
+    // Startposition bestimmen
+    let initialLat = 46.8182;   // Fallback Schweiz
+    let initialLng = 8.2275;
+    let initialZoom = 8;
+
+    if (!isNaN(startLat) && !isNaN(startLng)) {
+        initialLat = startLat;
+        initialLng = startLng;
+        initialZoom = isNaN(startZoom) ? 15 : startZoom;
+    }
+
+    // ============================================================
+    // 2. Karte initialisieren (GEÄNDERT)
+    // ============================================================
+    const map = L.map('map').setView([initialLat, initialLng], initialZoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // ============================================================
+    // 3. Marker-Cluster und GeoJSON laden (UNVERÄNDERT)
+    // ============================================================
+    const markers = L.markerClusterGroup({
+        chunkedLoading: true,
+        maxClusterRadius: 80
+    });
+
 const geojsonUrl = 'https://philippschaufelberger.github.io/HistoSwiss-all/histoswiss_all3.geojson';
 
-fetch(geojsonUrl)
-  .then(response => {
-    if (!response.ok) throw new Error('GeoJSON-Datei konnte nicht geladen werden');
-    return response.json();
-  })
-  .then(data => {
-    L.geoJSON(data, {
-      pointToLayer: (f, latlng) => L.marker(latlng),
-      onEachFeature: (f, l) => {
-        const p = f.properties;
-        const lat = l.getLatLng().lat;
-        const lng = l.getLatLng().lng;
-        let popup = `<b>${p.name || 'POI'}</b>`;
-        
-        // Bild
-        if (p.image_url && p.image_url.trim() !== "") {
-          popup += `<br><img src="${p.image_url}" width="250">`;
-        }
-        
-        // Liste vorbereiten
-        const items = [];
-        
-        // Distanz
-        if (p.distanz_kfr && p.distanz_kfr !== "" && p.distanz_kfr !== "Keine Angabe") {
-          items.push(`📏 Distanz zur KFR: ${p.distanz_kfr}`);
-        }
-        
-        // Quelle (target_url)
-        if (p.target_url && p.target_url.trim() !== "") {
-          items.push(`<a href="${p.target_url}" target="_blank">🔗 HistoPics / HistoSwiss</a>`);
-        }
-        
-        // Formular (aus form_id)
-        if (p.form_id && p.form_id.trim() !== "") {
-          const formUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=oee1AwnLF0SeGsaGtECyxSYqCNTH3KVCvNcgoFLg2XZUMTZFRlJWRkVXQVZUOE9EVUs4MUc1NFZWUS4u&rf7c4e2f2d7d7438c8efbe1b915a05a0c=" + p.form_id;
-          items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
-        }
-        
-           // Google Maps Link
-        const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-        items.push(`<a href="${googleMapsUrl}" target="_blank">🗺️ In Google Maps öffnen</a>`);
-        
-        // Liste einfügen
-        if (items.length > 0) {
-          popup += "<br><ul><li>" + items.join("</li><li>") + "</li></ul>";
-        }
-        
-        l.bindPopup(popup);
-      }
-    }).eachLayer(layer => markers.addLayer(layer));
-    
-    map.addLayer(markers);
-    
-    // BEHEBUNG FÜR "BOUNDS NOT VALID":
-    // Wir prüfen erst, ob gültige Koordinaten-Grenzen existieren
-    const bounds = markers.getBounds();
-    if (bounds.isValid()) {
-        map.fitBounds(bounds);
-    } else {
-        // Falls der Cluster-Manager noch rechnet, nutzen wir die Standard-Schweiz-Ansicht als Fallback
-        map.setView([46.8182, 8.2275], 8);
-    }
-  })
-  .catch(error => {
-    document.getElementById('map').innerHTML = `<div style="color:red;padding:20px;">Fehler: ${error.message}</div>`;
-  });
+    fetch(geojsonUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP-Fehler: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            L.geoJSON(data, {
+                pointToLayer: (f, latlng) => L.marker(latlng),
+                onEachFeature: (f, l) => {
+                    const p = f.properties;
+                    const lat = l.getLatLng().lat;
+                    const lng = l.getLatLng().lng;
+
+                    let popup = `<b>${p.name || 'POI'}</b>`;
+
+                    // Bild
+                    if (p.image_url && p.image_url.trim() !== "") {
+                        popup += `<br><img src="${p.image_url}" width="250">`;
+                    }
+
+                    // Liste vorbereiten
+                    const items = [];
+
+                    // Distanz
+                    if (p.distanz_kfr && p.distanz_kfr !== "" && p.distanz_kfr !== "Keine Angabe") {
+                        items.push(`📏 Distanz zur KFR: ${p.distanz_kfr}`);
+                    }
+
+                    // Quelle (target_url)
+                    if (p.target_url && p.target_url.trim() !== "") {
+                        items.push(`<a href="${p.target_url}" target="_blank">🔗 HistoPics / HistoSwiss</a>`);
+                    }
+
+                    // Formular (aus form_id)
+                    if (p.form_id && p.form_id.trim() !== "") {
+                        const formUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=oee1AwnLF0SeGsaGtECyxSYqCNTH3KVCvNcgoFLg2XZUMTZFRlJWRkVXQVZUOE9EVUs4MUc1NFZWUS4u&rf7c4e2f2d7d7438c8efbe1b915a05a0c=" + p.form_id;
+                        items.push(`<a href="${formUrl}" target="_blank">📝 Zur Formseingabe</a>`);
+                    }
+
+                    // Google Maps Link
+                    const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+                    items.push(`<a href="${googleMapsUrl}" target="_blank">🗺️ In Google Maps öffnen</a>`);
+
+                    // Liste einfügen
+                    if (items.length > 0) {
+                        popup += "<br><ul><li>" + items.join("</li><li>") + "</li></ul>";
+                    }
+
+                    l.bindPopup(popup);
+                }
+            }).eachLayer(layer => markers.addLayer(layer));
+
+            map.addLayer(markers);
+
+            // ============================================================
+            // 4. Nur auf alle Marker zoomen, wenn KEINE Koordinaten in der URL (GEÄNDERT)
+            // ============================================================
+            if (isNaN(startLat) || isNaN(startLng)) {
+                map.fitBounds(markers.getBounds());
+            }
+        })
+        .catch(error => {
+            document.getElementById('map').innerHTML = `
+                <div style="color:red;padding:20px;font-family:sans-serif;">
+                    Fehler beim Laden der Karte:<br>
+                    ${error.message}
+                </div>
+            `;
+        });
 </script>
+
 </body>
 </html>
