@@ -38,26 +38,26 @@
     // 0. Überkategorien und Farben
     // ============================================================
     const UEBERKATEGORIEN = [
-        { key: 'peaks',    label: 'HistoSwiss Peaks', farbe: '#3cb44b' },
-        { key: 'pics',     label: 'Histopics',        farbe: '#e6194b' },
-        { key: 'schutz',   label: 'Schutzobjekte',    farbe: '#4363d8' }
+        { key: 'peaks',  label: 'HistoSwiss Peaks', farbe: '#3cb44b' },
+        { key: 'pics',   label: 'Histopics',        farbe: '#e6194b' },
+        { key: 'schutz', label: 'Schutzobjekte',    farbe: '#4363d8' }
     ];
     const FALLBACK_FARBE = '#888888';
 
     // Ordnet eine Kategorie einer Überkategorie zu.
-    // Regeln: HSP -> Peaks; Histopics -> Histopics; alles andere -> Schutzobjekte
+    // Regeln:
+    //   beginnt mit "HSP"        -> Peaks      (z. B. "HSP", "HSP 2000-2500 m.ü.M.")
+    //   beginnt mit "Histopics"  -> Histopics  (z. B. "Histopics", "Histopics-2288")
+    //   alles andere             -> Schutzobjekte (KGS, KGS-CH, ODB, ODB-ID, ISOS, ...)
     function ueberkategorie(kategorie) {
         if (!kategorie) return null;
         const k = kategorie.toString().trim();
         if (k === '') return null;
+        const ku = k.toUpperCase();
 
-        // HSP = HistoSwiss Peaks
-        if (k.toUpperCase() === 'HSP') return 'peaks';
+        if (ku.indexOf('HSP') === 0) return 'peaks';
+        if (ku.indexOf('HISTOPICS') === 0) return 'pics';
 
-        // Histopics (exakt)
-        if (k.toLowerCase() === 'histopics') return 'pics';
-
-        // Alles andere sind Schutzobjekte (KGS, ODB, ISOS, KGS-ZH, KGS-CH, ODB-ID, ...)
         return 'schutz';
     }
 
@@ -118,7 +118,6 @@
             return response.json();
         })
         .then(data => {
-            // Set zum Sammeln der vorkommenden Überkategorien (für die Legende)
             const gefundeneUeberkategorien = new Set();
 
             L.geoJSON(data, {
@@ -126,9 +125,8 @@
                 pointToLayer: (f, latlng) => {
                     const p = f.properties || {};
                     const farbe = farbeFuerKategorie(p.kategorie);
-                    if (ueberkategorie(p.kategorie)) {
-                        gefundeneUeberkategorien.add(ueberkategorie(p.kategorie));
-                    }
+                    const key = ueberkategorie(p.kategorie);
+                    if (key) gefundeneUeberkategorien.add(key);
 
                     return L.circleMarker(latlng, {
                         radius: 7,
@@ -152,14 +150,14 @@
 
                     const items = [];
 
-                    // Kategorie / Überkategorie
-                    if (p.kategorie && p.kategorie.trim() !== "") {
-                        items.push(`🏷️ Kategorie: ${p.kategorie} <em>(${labelFuerKategorie(p.kategorie)})</em>`);
+                    // Überkategorie
+                    if (p.kategorie && p.kategorie.toString().trim() !== "") {
+                        items.push(`🏷️ Bereich: ${labelFuerKategorie(p.kategorie)}`);
                     }
 
                     // Kanton
-                    if (p.kanton && p.kanton.trim() !== "") {
-                        items.push(`📍 Kanton: ${p.kanton}`);
+                    if (p.kanton && p.kanton.toString().trim() !== "") {
+                        items.push(`🇨🇭 Kanton: ${p.kanton}`);
                     }
 
                     // Jahrzehnt / Jahrhundert
@@ -212,7 +210,7 @@
             // ============================================================
             if (gefundeneUeberkategorien.size > 0) {
                 const legendeDiv = L.DomUtil.create('div', 'histoswiss-legende');
-                let html = '<b>Kategorien</b><br>';
+                let html = '<b>Bereiche</b><br>';
                 UEBERKATEGORIEN.forEach(u => {
                     if (gefundeneUeberkategorien.has(u.key)) {
                         html += `<span class="farbe" style="background:${u.farbe}"></span>${u.label}<br>`;
