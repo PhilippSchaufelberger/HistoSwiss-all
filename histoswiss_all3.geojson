@@ -72345,36 +72345,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     8.59989,
-     47.26056
-    ]
-   },
-   "properties": {
-    "name": "Horgen, Löwengasse 16 - ODB-ID-12559 von Vanessa W. 5a @HistoSwiss",
-    "poi": "ODB-ID-12559 von Vanessa W. 5a @HistoSwiss",
-    "distanz_kfr": "12,89 km",
-    "image_url": "https://histoswiss.ch/beitraege/wp-content/uploads/sites/3/2023/07/998b2-20230731_175002.jpg",
-    "target_url": "https://histoswiss.ch/beitraege/2023/07/30/horgen-reihenhauser-beitrag-von-vanessa-w-5a-kfr-2023-7-30-2/",
-    "form_id": "ODB-ID-12559",
-    "order": 999999,
-    "kanton": "ZH",
-    "kategorie": "HistoSwiss",
-    "jahrzehnt": "1540s",
-    "jahrhundert": "16.Jh",
-    "typ": "beitrag",
-    "tags": [
-     "CH-ZH",
-     "Horgen",
-     "Schweiz"
-    ],
-    "quelle_kategorie": "Denkmalpflege Kt. Zürich"
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      8.59781,
      47.25936
     ]
