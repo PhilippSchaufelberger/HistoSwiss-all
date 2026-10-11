@@ -113738,30 +113738,6 @@
    "geometry": {
     "type": "Point",
     "coordinates": [
-     8.53639,
-     47.19508
-    ]
-   },
-   "properties": {
-    "name": "Baar, Haldenstrasse 1-5 / Langgasse 40 - KGS-CH-7243 von Leandro 4e @HistoSwiss",
-    "poi": "KGS-CH-7243 von Leandro 4e @HistoSwiss",
-    "distanz_kfr": "18,87 km",
-    "image_url": "https://histoswiss.ch/beitraege/wp-content/uploads/sites/3/2024/06/img_2717.webp",
-    "target_url": "https://histoswiss.ch/beitraege/2024/06/15/baar-spinnerei-an-der-lorze-altbau-verwaltungsgebude-kosthuser-kesselhaus-kraftwerk-wasserreservoir-kgs-ch-7243/",
-    "form_id": "KGS-CH-7243",
-    "order": 999999,
-    "kanton": "ZG",
-    "kategorie": "HistoSwiss",
-    "jahrzehnt": "1850s",
-    "jahrhundert": "19.Jh",
-    "quelle_kategorie": "KGS-CH"
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
      8.53803,
      47.19522
     ]
@@ -334574,44 +334550,6 @@
      "Schweiz",
      "Urnerboden"
     ]
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     9.02478,
-     46.9455
-    ]
-   },
-   "properties": {
-    "name": "Glarus Süd Betschwanden, Bahnhofstrasse 1a; Reformierte Kirche - KGS-CH-2649",
-    "poi": "KGS-CH-2649",
-    "distanz_kfr": "59,91 km",
-    "form_id": "KGS-CH-2649",
-    "order": 999999,
-    "kanton": "GL",
-    "kategorie": "KGS-CH"
-   }
-  },
-  {
-   "type": "Feature",
-   "geometry": {
-    "type": "Point",
-    "coordinates": [
-     9.02478,
-     46.9455
-    ]
-   },
-   "properties": {
-    "name": "Glarus Süd Betschwanden, Bahnhofstrasse 1a; Reformierte Kirche - KGS-CH-2649",
-    "poi": "KGS-CH-2649",
-    "distanz_kfr": "59,91 km",
-    "form_id": "KGS-CH-2649",
-    "order": 999999,
-    "kanton": "GL",
-    "kategorie": "KGS-CH"
    }
   },
   {
